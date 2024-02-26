@@ -2,16 +2,27 @@ import { Request, Response,NextFunction } from "express"
 import jwt from "jsonwebtoken";
 
 export default function isAuth(req:Request,res:Response,next:NextFunction){
-    
-    const {token} = req.cookies();
 
-    const isAuthenticated = jwt.verify(token,process.env.JWT_SECRET as string);
+    try{
 
-    if(!isAuthenticated){
-        res.status(403).json({error:'Unauthenticated'});
-        return;
+        const {token} = req.cookies;
+        console.log(token); 
+        let isAuthenticated;
+
+        if(token){
+            isAuthenticated = jwt.verify(token,process.env.JWT_SECRET as string);
+        }
+        
+        if(!isAuthenticated){
+            res.status(403).json({error:'Unauthenticated'});
+            return;
+        }
+        
+        next();
     }
-
-    next();
+    catch(e){
+        console.log(`Error in isAuth ${e}`);
+        
+    }
 
 }

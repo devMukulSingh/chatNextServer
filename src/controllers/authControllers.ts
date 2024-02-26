@@ -38,7 +38,7 @@ export async function addUserControllers (
 
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    const newUser = await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         email,
         name,
@@ -61,7 +61,8 @@ export async function addUserControllers (
       httpOnly: true
     })
 
-    res.status(201).json({ newUser })
+    res.status(200).cookie('token', token).json({...user,token})
+
   } catch (e) {
     next(e)
   }
@@ -115,7 +116,7 @@ export async function checkUserController (
       }
     )
 
-    res.status(200).cookie('token', token).json(user)
+    res.status(200).cookie('token', token).json({...user,token})
   } catch (e) {
     next(e)
   }
@@ -130,3 +131,4 @@ export async function logoutUserController(req:Request,res:Response,next:NextFun
     next(e)
   }
 }
+
