@@ -7,7 +7,6 @@ export async function postMessageController(req:Request,res:Response,next:NextFu
 
         const { message, senderId, receiverId} = req.body;
 
-        console.log(message,senderId,receiverId);
 
         if(!message){
             res.status(400).json({error:'Message is required'});
@@ -84,7 +83,7 @@ export async function getMessagesController(req:Request,res:Response,next:NextFu
         return;
         
     }catch(e){
-        res.status(500).json(`Error in postMessageController ${e}`);
+        res.status(500).json(`Error in postMessageController ${e}`); 
         console.log(`Error in postMessageController ${e}`);
         next(e);
         return;
@@ -94,7 +93,7 @@ export async function getMessagesController(req:Request,res:Response,next:NextFu
 export async function deleteMessageController(req:Request,res:Response,next:NextFunction){
     try{
 
-        const { messageId  } = req.body;
+        const messageId = req.query.messageId?.toString();
 
         if(!messageId) {
             res.status(400).json({error:'MessageId is required'});
@@ -120,9 +119,9 @@ export async function deleteMessageController(req:Request,res:Response,next:Next
 
 export async function editMessageController(req:Request,res:Response,next:NextFunction){
     try{
-
+        
         const { messageId,message  } = req.body;
-
+        
         if(!messageId) {
             res.status(400).json({error:'MessageId is required'});
             return;

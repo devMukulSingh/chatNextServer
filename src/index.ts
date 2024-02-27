@@ -1,29 +1,64 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import authRoutes from "./routes/authRoutes";
-import cookieParser from "cookie-parser";
-import userRoutes from "./routes/userRoutes";
-import messageRoutes from "./routes/messageRoutes";
+import express from 'express'
+import cors from 'cors'
+import dotenv from 'dotenv'
+import authRoutes from './routes/authRoutes'
+import cookieParser from 'cookie-parser'
+import userRoutes from './routes/userRoutes'
+import messageRoutes from './routes/messageRoutes'
+import { createServer } from 'http'
+import { Server } from 'socket.io'
 
-dotenv.config();
+dotenv.config()
 
-const app = express();
-
-const PORT = process.env.PORT || 8000;
-
-app.use(cors());
-app.use(cookieParser());
-app.use(express.json());
-
-app.use(`/api/auth`,authRoutes);
-app.use(`/api/user`,userRoutes);
-app.use(`/api/message`,messageRoutes)
-
-app.get(`/`,(req,res) => {
-    res.send(`Hell from server`);
+const app = express()
+const server = createServer(app)
+const io = new Server(server,{
+    cors: {
+        origin: 'http://localhost:3000'
+      }
 })
 
-app.listen(PORT, () => {
-    console.log(`Server is running at PORT ${PORT}`);  
-});
+const PORT = process.env.PORT || 8000
+
+app.use(cors())
+app.use(cookieParser())
+app.use(express.json())
+
+app.use(`/api/auth`, authRoutes)
+app.use(`/api/user`, userRoutes)
+app.use(`/api/message`, messageRoutes)
+
+app.get(`/`, (req, res) => {
+  res.send(`Hell from server`)
+})
+server.listen(PORT, () => {
+  console.log(`Server is running at PORT ${PORT}`)
+})
+//@ts-ignore
+// global.onlineUsers = new Map();
+let onlineUsers = new Map();
+
+io.on('connection', socket => {
+  socket.on("add-user", (userId) => {
+    if(userId){  
+            onlineUsers.set(userId,socket.id);
+            console.log("socket connected",onlineUsers);
+        } 
+    })
+
+    socket.on("send-msg", (message) => {
+        
+        if(!message) console.log('message is required');
+
+        const receiverSocket = onlineUsers.get(message.receiverId); 
+
+        if(!receiverSocket) console.log('receiverSocket is required'); 
+
+        socket.to(receiverSocket).emit('receive-msg',message);
+        console.log("at server");
+        
+
+    })
+
+})
+ 
