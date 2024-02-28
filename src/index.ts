@@ -54,8 +54,10 @@ io.on('connection', socket => {
 
         if(!receiverSocket) console.log('receiverSocket is required'); 
 
-        socket.to(receiverSocket).emit('receive-msg',message);
-        console.log("at server");
+        if(message){
+          socket.to(receiverSocket).emit('receive-msg',message);
+          console.log("scoket triggered");
+        }
         
 
     })
