@@ -28,14 +28,11 @@ app.use(`/api/auth`, authRoutes)
 app.use(`/api/user`, userRoutes)
 app.use(`/api/message`, messageRoutes)
 
-app.get(`/`, (req, res) => {
-  res.send(`Hell from server`)
-})
 server.listen(PORT, () => {
   console.log(`Server is running at PORT ${PORT}`)
 })
-//@ts-ignore
-// global.onlineUsers = new Map();
+
+
 let onlineUsers = new Map();
 
 io.on('connection', socket => {
