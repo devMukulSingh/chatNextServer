@@ -5,7 +5,8 @@ import {
   deleteMessageController,
   editMessageController,
   uploadFileController,
-  getFileController
+  getFileController,
+  downloadFileController
 } from '../controllers/messageController'
 import multer from 'multer'
 
@@ -28,6 +29,8 @@ messageRoutes.delete(`/delete-message`, deleteMessageController)
 messageRoutes.patch(`/edit-message`, editMessageController)
 messageRoutes.post('/upload-file', upload.single('file'), uploadFileController);
 messageRoutes.get('/get-file/:fileId', getFileController);
+messageRoutes.get('/download-file/:fileId', downloadFileController);
+
 
 
 export default messageRoutes

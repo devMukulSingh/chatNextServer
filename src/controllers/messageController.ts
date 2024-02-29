@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import { prisma } from '../lib/prisma'
 import { renameSync } from 'fs'
 import { BASE_URL } from '../lib/BASE_URL'
+const path = require('path')
 
 export async function postMessageController (
   req: Request,
@@ -158,8 +159,8 @@ export async function uploadFileController (
   next: NextFunction
 ) {
   try {
-    console.log(req.file);
-    
+    console.log(req.file)
+
     const file = req.file
     const senderId = req.query.senderId?.toString()
     const receiverId = req.query.receiverId?.toString()
@@ -189,12 +190,13 @@ export async function uploadFileController (
         senderId,
         type,
         filePath,
-        fileName:req.file?.filename,
+        fileName: req.file?.filename
       }
     })
-    res
-      .status(201)
-      .json({ path: `${BASE_URL}/api/message/get-file/${fileMessage.id}`,id:fileMessage.id })
+    res.status(201).json({
+      path: `${BASE_URL}/api/message/get-file/${fileMessage.id}`,
+      id: fileMessage.id
+    })
 
     return
   } catch (e) {
@@ -221,20 +223,55 @@ export async function getFileController (
       }
     })
 
-    if(!fileByFileId?.fileName){
-      res.status(404).json({error:'No such file found'});
-      return;
+    if (!fileByFileId?.fileName) {
+      res.status(404).json({ error: 'No such file found' })
+      return
     }
 
-    res.status(200).sendFile(fileByFileId?.fileName,{ root : 'uploads'});
-    return;
-
+    res.status(200).sendFile(fileByFileId?.fileName, { root: 'uploads' })
+    return
   } catch (e) {
     next(e)
   }
 }
 
-
 // export async function downloadFile(req:Request,res:Response) {
-  
+
 // }
+
+export async function downloadFileController (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const fileId = req.params.fileId.toString()
+    console.log(fileId)
+
+    if (!fileId) {
+      res.status(400).json({ error: 'File id is required' })
+    }
+
+    const file = await prisma.message.findUnique({
+      where: {
+        id: fileId
+      }
+    })
+    console.log(file)
+
+    if (!file) {
+      res.status(404).json({ error: 'No such file found' })
+      return
+    }
+    const fileName = file.fileName || ''
+
+    const filePath = path.join(__dirname, `../../uploads/${fileName}`)
+
+    res.download(filePath,fileName, (e) => {
+      console.log(e)
+    });
+    
+  } catch (e) {
+    next(e)
+  }
+}
