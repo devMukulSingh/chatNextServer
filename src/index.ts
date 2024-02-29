@@ -39,7 +39,6 @@ io.on('connection', socket => {
   socket.on("add-user", (userId) => {
     if(userId){  
             onlineUsers.set(userId,socket.id);
-            console.log("socket connected",onlineUsers);
         } 
     })
 
@@ -53,7 +52,6 @@ io.on('connection', socket => {
 
         if(message){
           socket.to(receiverSocket).emit('receive-msg',message);
-          console.log("scoket triggered");
         }
         
 

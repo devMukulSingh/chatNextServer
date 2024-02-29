@@ -235,9 +235,7 @@ export async function getFileController (
   }
 }
 
-// export async function downloadFile(req:Request,res:Response) {
 
-// }
 
 export async function downloadFileController (
   req: Request,
