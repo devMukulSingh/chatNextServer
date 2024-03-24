@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 import { prisma } from '../lib/prisma'
 import { renameSync } from 'fs'
-import { BASE_URL } from '../lib/BASE_URL'
+import { BASE_URL_SERVER } from '../lib/BASE_URL'
+import { putObject } from '../aws'
 const path = require('path')
 
 export async function postMessageController (
@@ -153,56 +154,56 @@ export async function editMessageController (
   }
 }
 
-export async function uploadFileController (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    console.log(req.file)
+// export async function uploadFileController (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) {
+//   try {
+//     console.log(req.file)
 
-    const file = req.file
-    const senderId = req.query.senderId?.toString()
-    const receiverId = req.query.receiverId?.toString()
-    const type = req.query.type?.toString()
-    const filePath = req.file?.path || ''
+//     const file = req.file
+//     const senderId = req.query.senderId?.toString()
+//     const receiverId = req.query.receiverId?.toString()
+//     const type = req.query.type?.toString()
+//     const filePath = req.file?.path || ''
 
-    if (!file) {
-      res.status(400).json({ error: 'File is required' })
-      return
-    }
-    if (!senderId) {
-      res.status(400).json({ error: 'SenderId is required' })
-      return
-    }
-    if (!receiverId) {
-      res.status(400).json({ error: 'receiverId is required' })
-      return
-    }
-    if (!type) {
-      res.status(400).json({ error: 'type is required' })
-      return
-    }
+//     if (!file) {
+//       res.status(400).json({ error: 'File is required' })
+//       return
+//     }
+//     if (!senderId) {
+//       res.status(400).json({ error: 'SenderId is required' })
+//       return
+//     }
+//     if (!receiverId) {
+//       res.status(400).json({ error: 'receiverId is required' })
+//       return
+//     }
+//     if (!type) {
+//       res.status(400).json({ error: 'type is required' })
+//       return
+//     }
 
-    const fileMessage = await prisma.message.create({
-      data: {
-        receiverId,
-        senderId,
-        type,
-        filePath,
-        fileName: req.file?.filename
-      }
-    })
-    res.status(201).json({
-      path: `${BASE_URL}/api/message/get-file/${fileMessage.id}`,
-      id: fileMessage.id
-    })
+//     const fileMessage = await prisma.message.create({
+//       data: {
+//         receiverId,
+//         senderId,
+//         type,
+//         filePath,
+//         fileName: req.file?.filename
+//       }
+//     })
+//     res.status(201).json({
+//       path: `${BASE_URL_SERVER}/api/message/get-file/${fileMessage.id}`,
+//       id: fileMessage.id
+//     })
 
-    return
-  } catch (e) {
-    next(e)
-  }
-}
+//     return
+//   } catch (e) {
+//     next(e)
+//   }
+// }
 
 export async function getFileController (
   req: Request,
@@ -235,8 +236,6 @@ export async function getFileController (
   }
 }
 
-
-
 export async function downloadFileController (
   req: Request,
   res: Response,
@@ -265,11 +264,27 @@ export async function downloadFileController (
 
     const filePath = path.join(__dirname, `../../uploads/${fileName}`)
 
-    res.download(filePath,fileName, (e) => {
+    res.download(filePath, fileName, e => {
       console.log(e)
-    });
-    
+    })
   } catch (e) {
     next(e)
   }
+}
+
+export async function uploadFileController (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const file = req.file
+  const senderId = req.query.senderId?.toString();
+  const receiverId = req.query.receiverId?.toString();
+  const type = req.query.type?.toString();
+  const filePath = req.file?.path || '';
+
+  // const url = putObject({
+  //   filename,
+  //   contentType
+  // })
 }

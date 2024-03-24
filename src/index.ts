@@ -7,6 +7,7 @@ import userRoutes from './routes/userRoutes'
 import messageRoutes from './routes/messageRoutes'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
+import { BASE_URL_CLIENT } from './lib/BASE_URL'
 
 dotenv.config()
 
@@ -14,7 +15,7 @@ const app = express()
 const server = createServer(app)
 const io = new Server(server,{
     cors: {
-        origin: 'http://localhost:3000'
+        origin: BASE_URL_CLIENT
       }
 })
 
