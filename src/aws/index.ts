@@ -10,7 +10,7 @@ dotenv.config();
 
 interface IputObjecArgs {
   contentType: string;
-  key:string,
+  key: string;
 }
 
 export const s3Client = new S3Client({
@@ -30,7 +30,7 @@ export async function getObjectURL(key: string) {
   return url;
 }
 
-export async function putObject({ contentType, key}: IputObjecArgs) {
+export async function putObject({ contentType, key }: IputObjecArgs) {
   const command = new PutObjectCommand({
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: key,

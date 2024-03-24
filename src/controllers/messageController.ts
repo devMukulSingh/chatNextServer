@@ -4,7 +4,7 @@ import { renameSync } from "fs";
 import { BASE_URL_SERVER } from "../lib/BASE_URL";
 import { getObjectURL, putObject } from "../aws";
 const path = require("path");
-import axios from "axios"
+import axios from "axios";
 
 export async function postMessageController(
   req: Request,
@@ -279,7 +279,6 @@ export async function uploadFileController(
   next: NextFunction,
 ) {
   try {
-
     const file = req.file;
     const senderId = req.query.senderId?.toString();
     const receiverId = req.query.receiverId?.toString();
@@ -287,21 +286,23 @@ export async function uploadFileController(
     const filePath = req.file?.path || "";
 
     if (!file) return res.status(400).json({ error: `File is required` });
-    if (!senderId) return res.status(400).json({ error: `senderId is required` });
-    if (!receiverId) return res.status(400).json({ error: `receiverId is required` });
+    if (!senderId)
+      return res.status(400).json({ error: `senderId is required` });
+    if (!receiverId)
+      return res.status(400).json({ error: `receiverId is required` });
 
-    const filename = file?.filename || ""
+    const filename = file?.filename || "";
     const key = `uploads/file-message/${Date.now()}-${filename}`;
 
     const url = await putObject({
       key,
-      contentType: type
+      contentType: type,
     });
 
     const response = await axios.put(url, file.buffer, {
       headers: {
-        "Content-Type": type
-      }
+        "Content-Type": type,
+      },
     });
     // console.log(response);
 
@@ -316,14 +317,15 @@ export async function uploadFileController(
           connect: { id: receiverId },
         },
         message: imageUrl,
-        type: 'file'
+        type: "file",
       },
     });
 
     return res.status(201).json(imageUrl);
-  }
-  catch (e) {
+  } catch (e) {
     console.log(`Error in uploadFileController ${e}`);
-    return res.status(500).json({ error: `Error in uploadFileController ${e}` });
+    return res
+      .status(500)
+      .json({ error: `Error in uploadFileController ${e}` });
   }
 }
