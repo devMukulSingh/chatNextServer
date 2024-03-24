@@ -1,39 +1,42 @@
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-interface IputObjecArgs{
-    filename:string,
-    contentType:string,
+interface IputObjecArgs {
+  filename: string;
+  contentType: string;
 }
 
 export const s3Client = new S3Client({
-    region:"ap-south-1",
-    credentials:{
-        accessKeyId: process.env.AWS_ACCESS_KEY as string,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string
-    }
-})
+  region: "ap-south-1",
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY as string,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string,
+  },
+});
 
-export async function getObjectURL(key:string){
-    const command = new GetObjectCommand({
-        Bucket:process.env.AWS_BUCKET_NAME,
-        Key:key
-    })
-    const url = await getSignedUrl(s3Client,command);
-    return url;
+export async function getObjectURL(key: string) {
+  const command = new GetObjectCommand({
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: key,
+  });
+  const url = await getSignedUrl(s3Client, command);
+  return url;
 }
 
-export async function putObject({filename,contentType}:IputObjecArgs){
-    const command = new PutObjectCommand({
-        Bucket:process.env.AWS_BUCKET_NAME,
-        Key: `uploads/file-message/${Date.now()}-${filename}`,
-        ContentType: contentType
-    });
+export async function putObject({ filename, contentType }: IputObjecArgs) {
+  const command = new PutObjectCommand({
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: `uploads/file-message/${Date.now()}-${filename}`,
+    ContentType: contentType,
+  });
 
-    const url = await getSignedUrl(s3Client,command);
-    return url;
+  const url = await getSignedUrl(s3Client, command);
+  return url;
 }
-

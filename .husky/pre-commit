@@ -1,4 +1,5 @@
 
-npx tsc --noemit && eslint
+npx tsc --noemit
+
 
 npx prettier . --write

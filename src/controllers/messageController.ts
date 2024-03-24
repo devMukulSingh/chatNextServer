@@ -1,72 +1,72 @@
-import { NextFunction, Request, Response } from 'express'
-import { prisma } from '../lib/prisma'
-import { renameSync } from 'fs'
-import { BASE_URL_SERVER } from '../lib/BASE_URL'
-import { putObject } from '../aws'
-const path = require('path')
+import { NextFunction, Request, Response } from "express";
+import { prisma } from "../lib/prisma";
+import { renameSync } from "fs";
+import { BASE_URL_SERVER } from "../lib/BASE_URL";
+import { putObject } from "../aws";
+const path = require("path");
 
-export async function postMessageController (
+export async function postMessageController(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    const { message, senderId, receiverId } = req.body
+    const { message, senderId, receiverId } = req.body;
 
     if (!message) {
-      res.status(400).json({ error: 'Message is required' })
-      return
+      res.status(400).json({ error: "Message is required" });
+      return;
     }
 
     if (!senderId) {
-      res.status(400).json({ error: 'senderId is required' })
-      return
+      res.status(400).json({ error: "senderId is required" });
+      return;
     }
 
     if (!receiverId) {
-      res.status(400).json({ error: 'receiverId is required' })
-      return
+      res.status(400).json({ error: "receiverId is required" });
+      return;
     }
 
     const messages = await prisma.message.create({
       data: {
         senderUser: {
-          connect: { id: senderId }
+          connect: { id: senderId },
         },
         receiverUser: {
-          connect: { id: receiverId }
+          connect: { id: receiverId },
         },
-        message
-      }
-    })
+        message,
+      },
+    });
 
-    res.status(201).json(messages)
-    return
+    res.status(201).json(messages);
+    return;
   } catch (e) {
-    res.status(500).json(`Error in postMessageController ${e}`)
-    console.log(`Error in postMessageController ${e}`)
-    next(e)
-    return
+    res.status(500).json(`Error in postMessageController ${e}`);
+    console.log(`Error in postMessageController ${e}`);
+    next(e);
+    return;
   }
 }
 
-export async function getMessagesController (
+export async function getMessagesController(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    const senderId = req.query.senderId?.toString()
-    const receiverId = req.query.receiverId?.toString()
+    const senderId = req.query.senderId?.toString();
+    const receiverId = req.query.receiverId?.toString();
 
     if (!senderId) {
-      res.status(400).json({ error: 'senderId is required' })
-      return
+      res.status(400).json({ error: "senderId is required" });
+      return;
     }
 
     if (!receiverId) {
-      res.status(400).json({ error: 'receiverId is required' })
-      return
+      res.status(400).json({ error: "receiverId is required" });
+      return;
     }
 
     const messages = await prisma.message.findMany({
@@ -74,83 +74,83 @@ export async function getMessagesController (
         OR: [
           {
             senderId,
-            receiverId
+            receiverId,
           },
           {
             senderId: receiverId,
-            receiverId: senderId
-          }
-        ]
-      }
-    })
+            receiverId: senderId,
+          },
+        ],
+      },
+    });
 
-    res.status(200).json(messages)
-    return
+    res.status(200).json(messages);
+    return;
   } catch (e) {
-    res.status(500).json(`Error in postMessageController ${e}`)
-    console.log(`Error in postMessageController ${e}`)
-    next(e)
-    return
+    res.status(500).json(`Error in postMessageController ${e}`);
+    console.log(`Error in postMessageController ${e}`);
+    next(e);
+    return;
   }
 }
 
-export async function deleteMessageController (
+export async function deleteMessageController(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    const messageId = req.query.messageId?.toString()
+    const messageId = req.query.messageId?.toString();
 
     if (!messageId) {
-      res.status(400).json({ error: 'MessageId is required' })
-      return
+      res.status(400).json({ error: "MessageId is required" });
+      return;
     }
 
     const message = await prisma.message.delete({
       where: {
-        id: messageId
-      }
-    })
+        id: messageId,
+      },
+    });
 
-    res.status(200).json(message)
-    return
+    res.status(200).json(message);
+    return;
   } catch (e) {
-    next(e)
+    next(e);
   }
 }
 
-export async function editMessageController (
+export async function editMessageController(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    const { messageId, message } = req.body
+    const { messageId, message } = req.body;
 
     if (!messageId) {
-      res.status(400).json({ error: 'MessageId is required' })
-      return
+      res.status(400).json({ error: "MessageId is required" });
+      return;
     }
 
     if (!message) {
-      res.status(400).json({ error: 'message is required' })
-      return
+      res.status(400).json({ error: "message is required" });
+      return;
     }
 
     const response = await prisma.message.update({
       where: {
-        id: messageId
+        id: messageId,
       },
       data: {
-        message
-      }
-    })
+        message,
+      },
+    });
 
-    res.status(200).json(response)
-    return
+    res.status(200).json(response);
+    return;
   } catch (e) {
-    next(e)
+    next(e);
   }
 }
 
@@ -205,83 +205,83 @@ export async function editMessageController (
 //   }
 // }
 
-export async function getFileController (
+export async function getFileController(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    const fileId = req.params.fileId.toString()
+    const fileId = req.params.fileId.toString();
 
     if (!fileId) {
-      res.status(400).json({ error: 'File id is required' })
-      return
+      res.status(400).json({ error: "File id is required" });
+      return;
     }
 
     const fileByFileId = await prisma.message.findUnique({
       where: {
-        id: fileId
-      }
-    })
+        id: fileId,
+      },
+    });
 
     if (!fileByFileId?.fileName) {
-      res.status(404).json({ error: 'No such file found' })
-      return
+      res.status(404).json({ error: "No such file found" });
+      return;
     }
 
-    res.status(200).sendFile(fileByFileId?.fileName, { root: 'uploads' })
-    return
+    res.status(200).sendFile(fileByFileId?.fileName, { root: "uploads" });
+    return;
   } catch (e) {
-    next(e)
+    next(e);
   }
 }
 
-export async function downloadFileController (
+export async function downloadFileController(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    const fileId = req.params.fileId.toString()
-    console.log(fileId)
+    const fileId = req.params.fileId.toString();
+    console.log(fileId);
 
     if (!fileId) {
-      res.status(400).json({ error: 'File id is required' })
+      res.status(400).json({ error: "File id is required" });
     }
 
     const file = await prisma.message.findUnique({
       where: {
-        id: fileId
-      }
-    })
-    console.log(file)
+        id: fileId,
+      },
+    });
+    console.log(file);
 
     if (!file) {
-      res.status(404).json({ error: 'No such file found' })
-      return
+      res.status(404).json({ error: "No such file found" });
+      return;
     }
-    const fileName = file.fileName || ''
+    const fileName = file.fileName || "";
 
-    const filePath = path.join(__dirname, `../../uploads/${fileName}`)
+    const filePath = path.join(__dirname, `../../uploads/${fileName}`);
 
-    res.download(filePath, fileName, e => {
-      console.log(e)
-    })
+    res.download(filePath, fileName, (e) => {
+      console.log(e);
+    });
   } catch (e) {
-    next(e)
+    next(e);
   }
 }
 
-export async function uploadFileController (
+export async function uploadFileController(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
-  const file = req.file
+  const file = req.file;
   const senderId = req.query.senderId?.toString();
   const receiverId = req.query.receiverId?.toString();
   const type = req.query.type?.toString();
-  const filePath = req.file?.path || '';
+  const filePath = req.file?.path || "";
 
   // const url = putObject({
   //   filename,
