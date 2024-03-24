@@ -9,8 +9,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 interface IputObjecArgs {
-  filename: string;
   contentType: string;
+  key:string,
 }
 
 export const s3Client = new S3Client({
@@ -30,10 +30,10 @@ export async function getObjectURL(key: string) {
   return url;
 }
 
-export async function putObject({ filename, contentType }: IputObjecArgs) {
+export async function putObject({ contentType, key}: IputObjecArgs) {
   const command = new PutObjectCommand({
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: `uploads/file-message/${Date.now()}-${filename}`,
+    Key: key,
     ContentType: contentType,
   });
 

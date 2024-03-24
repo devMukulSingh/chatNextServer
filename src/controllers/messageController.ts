@@ -2,8 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 import { renameSync } from "fs";
 import { BASE_URL_SERVER } from "../lib/BASE_URL";
-import { putObject } from "../aws";
+import { getObjectURL, putObject } from "../aws";
 const path = require("path");
+import axios from "axios"
 
 export async function postMessageController(
   req: Request,
@@ -277,14 +278,52 @@ export async function uploadFileController(
   res: Response,
   next: NextFunction,
 ) {
-  const file = req.file;
-  const senderId = req.query.senderId?.toString();
-  const receiverId = req.query.receiverId?.toString();
-  const type = req.query.type?.toString();
-  const filePath = req.file?.path || "";
+  try {
 
-  // const url = putObject({
-  //   filename,
-  //   contentType
-  // })
+    const file = req.file;
+    const senderId = req.query.senderId?.toString();
+    const receiverId = req.query.receiverId?.toString();
+    const type = req.file?.mimetype || "";
+    const filePath = req.file?.path || "";
+
+    if (!file) return res.status(400).json({ error: `File is required` });
+    if (!senderId) return res.status(400).json({ error: `senderId is required` });
+    if (!receiverId) return res.status(400).json({ error: `receiverId is required` });
+
+    const filename = file?.filename || ""
+    const key = `uploads/file-message/${Date.now()}-${filename}`;
+
+    const url = await putObject({
+      key,
+      contentType: type
+    });
+
+    const response = await axios.put(url, file.buffer, {
+      headers: {
+        "Content-Type": type
+      }
+    });
+    // console.log(response);
+
+    const imageUrl = await getObjectURL(key);
+
+    const message = await prisma.message.create({
+      data: {
+        senderUser: {
+          connect: { id: senderId },
+        },
+        receiverUser: {
+          connect: { id: receiverId },
+        },
+        message: imageUrl,
+        type: 'file'
+      },
+    });
+
+    return res.status(201).json(imageUrl);
+  }
+  catch (e) {
+    console.log(`Error in uploadFileController ${e}`);
+    return res.status(500).json({ error: `Error in uploadFileController ${e}` });
+  }
 }
