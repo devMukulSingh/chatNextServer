@@ -155,57 +155,6 @@ export async function editMessageController(
   }
 }
 
-// export async function uploadFileController (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) {
-//   try {
-//     console.log(req.file)
-
-//     const file = req.file
-//     const senderId = req.query.senderId?.toString()
-//     const receiverId = req.query.receiverId?.toString()
-//     const type = req.query.type?.toString()
-//     const filePath = req.file?.path || ''
-
-//     if (!file) {
-//       res.status(400).json({ error: 'File is required' })
-//       return
-//     }
-//     if (!senderId) {
-//       res.status(400).json({ error: 'SenderId is required' })
-//       return
-//     }
-//     if (!receiverId) {
-//       res.status(400).json({ error: 'receiverId is required' })
-//       return
-//     }
-//     if (!type) {
-//       res.status(400).json({ error: 'type is required' })
-//       return
-//     }
-
-//     const fileMessage = await prisma.message.create({
-//       data: {
-//         receiverId,
-//         senderId,
-//         type,
-//         filePath,
-//         fileName: req.file?.filename
-//       }
-//     })
-//     res.status(201).json({
-//       path: `${BASE_URL_SERVER}/api/message/get-file/${fileMessage.id}`,
-//       id: fileMessage.id
-//     })
-
-//     return
-//   } catch (e) {
-//     next(e)
-//   }
-// }
-
 export async function getFileController(
   req: Request,
   res: Response,
