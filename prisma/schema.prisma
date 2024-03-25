@@ -38,7 +38,7 @@ model Message {
   receiverUser        User          @relation("userToReceivedMessages",fields: [receiverId], references: [id])
   receiverId          String          @db.ObjectId
   type                String        @default("text")
-  message             String?
+  message             String
   filePath           String?
   fileName           String?  
   // file               File             @relation(fields: [id],references: [fileId])

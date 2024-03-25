@@ -1,4 +1,5 @@
 import {
+  DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
   S3Client,
@@ -39,4 +40,13 @@ export async function putObject({ contentType, key }: IputObjecArgs) {
 
   const url = await getSignedUrl(s3Client, command);
   return url;
+}
+
+
+export async function deleteObject(key:string){
+  const command = new DeleteObjectCommand({
+    Bucket:process.env.AWS_BUCKET_NAME,
+    Key:key,
+  });
+  s3Client.send(command);
 }
