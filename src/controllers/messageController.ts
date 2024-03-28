@@ -86,7 +86,7 @@ export async function getMessagesController(
     });
 
     for (let message of messages) {
-      if (message.type === 'file') {
+      if (message.type === "file") {
         const imageUrl = await getObjectURL(message.message);
         message.message = imageUrl;
       }
@@ -99,60 +99,6 @@ export async function getMessagesController(
     console.log(`Error in postMessageController ${e}`);
     next(e);
     return;
-  }
-}
-
-export async function uploadFileController(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  try {
-    const file = req.file;
-    const senderId = req.query.senderId?.toString();
-    const receiverId = req.query.receiverId?.toString();
-    const type = req.file?.mimetype || "";
-    const filePath = req.file?.path || "";
-
-    if (!file) return res.status(400).json({ error: `File is required` });
-    if (!senderId) return res.status(400).json({ error: `senderId is required` });
-    if (!receiverId) return res.status(400).json({ error: `receiverId is required` });
-
-    const filename = file?.filename || "";
-    const key = `uploads/file-message/${Date.now()}-${filename}`;
-
-    const url = await putObject({
-      key,
-      contentType: type,
-    });
-
-    const response = await axios.put(url, file.buffer, {
-      headers: {
-        "Content-Type": type,
-      },
-    });
-    // console.log(response);
-
-    const message = await prisma.message.create({
-      data: {
-        senderUser: {
-          connect: { id: senderId },
-        },
-        receiverUser: {
-          connect: { id: receiverId },
-        },
-        message: key,
-        type: "file",
-      },
-    });
-    const imageUrl = await getObjectURL(key);
-
-    return res.status(201).json(imageUrl);
-  } catch (e) {
-    console.log(`Error in uploadFileController ${e}`);
-    return res
-      .status(500)
-      .json({ error: `Error in uploadFileController ${e}` });
   }
 }
 
@@ -169,14 +115,14 @@ export async function deleteMessageController(
       return;
     }
     const message = await prisma.message.findUnique({
-      where:{
-        id:messageId
-      }
+      where: {
+        id: messageId,
+      },
     });
-    if(!message){
-      return res.status(400).json({error:'no Message found'});
+    if (!message) {
+      return res.status(400).json({ error: "no Message found" });
     }
-    if(message.type==='file'){
+    if (message.type === "file") {
       await deleteObject(message.message);
     }
 
@@ -226,37 +172,92 @@ export async function editMessageController(
     next(e);
   }
 }
-
-export async function getFileController(
+export async function uploadFileController(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const fileId = req.params.fileId.toString();
+    const file = req.file;
+    const senderId = req.query.senderId?.toString();
+    const receiverId = req.query.receiverId?.toString();
+    const type = req.file?.mimetype || "";
+    const filePath = req.file?.path || "";
 
-    if (!fileId) {
-      res.status(400).json({ error: "File id is required" });
-      return;
-    }
+    if (!file) return res.status(400).json({ error: `File is required` });
+    if (!senderId)
+      return res.status(400).json({ error: `senderId is required` });
+    if (!receiverId)
+      return res.status(400).json({ error: `receiverId is required` });
 
-    const fileByFileId = await prisma.message.findUnique({
-      where: {
-        id: fileId,
+    const filename = file?.filename || "";
+    const key = `uploads/file-message/${Date.now()}-${filename}`;
+
+    const url = await putObject({
+      key,
+      contentType: type,
+    });
+
+    const response = await axios.put(url, file.buffer, {
+      headers: {
+        "Content-Type": type,
       },
     });
 
-    if (!fileByFileId?.fileName) {
-      res.status(404).json({ error: "No such file found" });
-      return;
-    }
+    const message = await prisma.message.create({
+      data: {
+        senderUser: {
+          connect: { id: senderId },
+        },
+        receiverUser: {
+          connect: { id: receiverId },
+        },
+        message: key,
+        type: "file",
+      },
+    });
+    const imageUrl = await getObjectURL(key);
 
-    res.status(200).sendFile(fileByFileId?.fileName, { root: "uploads" });
-    return;
+    return res.status(201).json(imageUrl);
   } catch (e) {
-    next(e);
+    console.log(`Error in uploadFileController ${e}`);
+    return res
+      .status(500)
+      .json({ error: `Error in uploadFileController ${e}` });
   }
 }
+
+
+// export async function getFileController(
+//   req: Request,
+//   res: Response,
+//   next: NextFunction,
+// ) {
+//   try {
+//     const fileId = req.params.fileId.toString();
+
+//     if (!fileId) {
+//       res.status(400).json({ error: "File id is required" });
+//       return;
+//     }
+
+//     const fileByFileId = await prisma.message.findUnique({
+//       where: {
+//         id: fileId,
+//       },
+//     });
+
+//     if (!fileByFileId?.fileName) {
+//       res.status(404).json({ error: "No such file found" });
+//       return;
+//     }
+
+//     res.status(200).sendFile(fileByFileId?.fileName, { root: "uploads" });
+//     return;
+//   } catch (e) {
+//     next(e);
+//   }
+// }
 
 export async function downloadFileController(
   req: Request,
@@ -293,5 +294,4 @@ export async function downloadFileController(
     next(e);
   }
 }
-
 

@@ -42,11 +42,10 @@ export async function putObject({ contentType, key }: IputObjecArgs) {
   return url;
 }
 
-
-export async function deleteObject(key:string){
+export async function deleteObject(key: string) {
   const command = new DeleteObjectCommand({
-    Bucket:process.env.AWS_BUCKET_NAME,
-    Key:key,
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: key,
   });
   s3Client.send(command);
 }
