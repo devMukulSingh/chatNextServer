@@ -19,7 +19,6 @@
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
-  "build": "tsc",
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.6",
@@ -42,7 +41,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./src/index.js",
     "dev": "nodemon",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
