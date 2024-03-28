@@ -227,7 +227,6 @@ export async function uploadFileController(
   }
 }
 
-
 // export async function getFileController(
 //   req: Request,
 //   res: Response,
@@ -294,4 +293,3 @@ export async function downloadFileController(
     next(e);
   }
 }
-
