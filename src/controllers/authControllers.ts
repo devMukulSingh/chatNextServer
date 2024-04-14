@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import nodemailer from 'nodemailer'
+import nodemailer from "nodemailer";
 import { jwtSign } from "../lib/jwt";
 import { User } from "@prisma/client";
 
@@ -10,37 +10,38 @@ export async function sendOtpController(req: Request, res: Response) {
   try {
     const { email, password, name } = req.body;
 
-    const user:User | null = await prisma.user.findUnique({
+    const user: User | null = await prisma.user.findUnique({
       where: {
         email,
-      }
+      },
     });
 
-    if (user?.isVerified===true) return res.status(400).json({
-      error: "User already exists",
-    });
+    if (user?.isVerified === true)
+      return res.status(400).json({
+        error: "User already exists",
+      });
 
     //sending OTP
     const transporter = nodemailer.createTransport({
-      host: 'smtp-relay.brevo.com',
+      host: "smtp-relay.brevo.com",
       port: 587,
       auth: {
-        user: 'mukulsingh2276@gmail.com',
-        pass: process.env.SMTP_PASS
-      }
-    })
-    
+        user: "mukulsingh2276@gmail.com",
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
     let otp = 0;
     const sendOtp = async () => {
       otp = Math.ceil(Math.random() * 10000);
       const mailOtptions = {
-        from: 'mukulsingh2276@gmail.com',
+        from: "mukulsingh2276@gmail.com",
         to: email,
-        subject: 'Verfify your email',
-        html: `<h1>Enter the otp ${otp} to verify your email</h1>`
-      }
+        subject: "Verfify your email",
+        html: `<h1>Enter the otp ${otp} to verify your email</h1>`,
+      };
       await transporter.sendMail(mailOtptions);
-    }
+    };
 
     await sendOtp();
 
@@ -48,16 +49,16 @@ export async function sendOtpController(req: Request, res: Response) {
     // const hashedOtp = await bcrypt.hash(otp.toLocaleString(), 8);
 
     let newUser;
-    if(user && user?.isVerified === false){
+    if (user && user?.isVerified === false) {
       newUser = await prisma.user.update({
-        where:{
-          id:user.id
+        where: {
+          id: user.id,
         },
         data: {
-          otp:otp.toString()
+          otp: otp.toString(),
           // otp: hashedOtp,
-        }
-      })
+        },
+      });
 
       return res.status(201).json("Otp sent");
     }
@@ -67,49 +68,47 @@ export async function sendOtpController(req: Request, res: Response) {
         password: hashedPassword,
         // otp: hashedOtp,
         otp: otp.toString(),
-        name
-      }
-    })
+        name,
+      },
+    });
     return res.status(201).json("Otp sent");
-  }
-  catch (e) {
+  } catch (e) {
     console.log(`Error in sendOtp controller ${e}`);
     return res.status(500).json(e);
   }
 }
 
 export async function verifyOtpController(req: Request, res: Response) {
-
   try {
     const { email, otp } = req.body;
     console.log(otp);
-    
+
     if (!email || email === "") {
       return res.status(400).json({
-        error: "Email is required"
-      })
+        error: "Email is required",
+      });
     }
     if (!otp || otp === "") {
       return res.status(400).json({
-        error: "otp is required"
-      })
+        error: "otp is required",
+      });
     }
 
     const user = await prisma.user.findUnique({
       where: {
         email,
-      }
+      },
     });
 
     if (!user) {
       return res.status(400).json({
-        error: "User doesn't exists"
-      })
+        error: "User doesn't exists",
+      });
     }
-    if(user.otp !== otp){
-       return res.status(400).json({
-          error: "Invalid OTP"
-        })
+    if (user.otp !== otp) {
+      return res.status(400).json({
+        error: "Invalid OTP",
+      });
     }
     // const isOtpCorrect = await bcrypt.compare(otp, user.otp)
 
@@ -124,24 +123,23 @@ export async function verifyOtpController(req: Request, res: Response) {
         email,
       },
       data: {
-        isVerified: true
-      }
-    })
+        isVerified: true,
+      },
+    });
 
-    const token = await jwtSign()
+    const token = await jwtSign();
 
-    res.cookie('token', token, {
-      httpOnly: true
-    })
+    res.cookie("token", token, {
+      httpOnly: true,
+    });
 
-    return res.status(200).json({...user,token});
-  }
-  catch (e) {
+    return res.status(200).json({ ...user, token });
+  } catch (e) {
     console.log(`Error in verifyOtpController ${e}`);
-    return res.status(500).json(e)
+    return res.status(500).json(e);
   }
 }
- 
+
 export async function checkUserController(
   req: Request,
   res: Response,
@@ -163,9 +161,8 @@ export async function checkUserController(
     const user = await prisma.user.findUnique({
       where: {
         email,
-        isVerified:true
+        isVerified: true,
       },
-
     });
 
     if (!user) {
@@ -181,11 +178,11 @@ export async function checkUserController(
       }
     }
 
-    const token = await jwtSign()
+    const token = await jwtSign();
 
-    res.cookie('token', token, {
-      httpOnly: true
-    })
+    res.cookie("token", token, {
+      httpOnly: true,
+    });
 
     res
       .status(200)
@@ -208,4 +205,3 @@ export async function logoutUserController(
     next(e);
   }
 }
-

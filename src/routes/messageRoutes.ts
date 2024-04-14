@@ -4,7 +4,7 @@ import {
   postMessageController,
   deleteMessageController,
   editMessageController,
-  downloadFileController,
+  // downloadFileController,
   uploadFileController,
 } from "../controllers/messageController";
 import multer from "multer";
@@ -20,6 +20,6 @@ messageRoutes.get("/get-messages", getMessagesController);
 messageRoutes.delete(`/delete-message`, deleteMessageController);
 messageRoutes.patch(`/edit-message`, editMessageController);
 messageRoutes.post("/upload-file", upload.single("file"), uploadFileController);
-messageRoutes.get("/download-file/:fileId", downloadFileController);
+// messageRoutes.get("/download-file/:fileId", downloadFileController);
 
 export default messageRoutes;

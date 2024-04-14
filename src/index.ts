@@ -41,9 +41,8 @@ io.on("connection", (socket) => {
       onlineUsers.set(userId, socket.id);
     }
   });
-  
-  socket.on("send-msg", (message) => {
 
+  socket.on("send-msg", (message) => {
     const receiverSocket = onlineUsers.get(message.receiverId);
 
     if (!receiverSocket) console.log("receiverSocket is required");

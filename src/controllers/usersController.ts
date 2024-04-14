@@ -8,11 +8,11 @@ export async function getUsersController(
 ) {
   try {
     const users = await prisma.user.findMany({
-      where:{
-        isVerified:true
-      }
+      where: {
+        isVerified: true,
+      },
     });
-    
+
     res.status(200).json(users);
 
     return;

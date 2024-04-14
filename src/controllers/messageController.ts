@@ -258,38 +258,38 @@ export async function uploadFileController(
 //   }
 // }
 
-export async function downloadFileController(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  try {
-    const fileId = req.params.fileId.toString();
-    console.log(fileId);
+// export async function downloadFileController(
+//   req: Request,
+//   res: Response,
+//   next: NextFunction,
+// ) {
+//   try {
+//     const fileId = req.params.fileId.toString();
+//     console.log(fileId);
 
-    if (!fileId) {
-      res.status(400).json({ error: "File id is required" });
-    }
+//     if (!fileId) {
+//       res.status(400).json({ error: "File id is required" });
+//     }
 
-    const file = await prisma.message.findUnique({
-      where: {
-        id: fileId,
-      },
-    });
-    console.log(file);
+//     const file = await prisma.message.findUnique({
+//       where: {
+//         id: fileId,
+//       },
+//     });
+//     console.log(file);
 
-    if (!file) {
-      res.status(404).json({ error: "No such file found" });
-      return;
-    }
-    const fileName = file.fileName || "";
+//     if (!file) {
+//       res.status(404).json({ error: "No such file found" });
+//       return;
+//     }
+//     const fileName = file.fileName || "";
 
-    const filePath = path.join(__dirname, `../../uploads/${fileName}`);
+//     const filePath = path.join(__dirname, `../../uploads/${fileName}`);
 
-    res.download(filePath, fileName, (e) => {
-      console.log(e);
-    });
-  } catch (e) {
-    next(e);
-  }
-}
+//     res.download(filePath, fileName, (e) => {
+//       console.log(e);
+//     });
+//   } catch (e) {
+//     next(e);
+//   }
+// }
