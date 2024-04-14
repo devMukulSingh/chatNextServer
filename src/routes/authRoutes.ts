@@ -1,13 +1,16 @@
 import { Router } from "express";
 import {
-  addUserControllers,
+ 
   checkUserController,
   logoutUserController,
+  sendOtpController,
+  verifyOtpController,
 } from "../controllers/authControllers";
 
-const authRoutes = Router();
+const authRoutes = Router()
 
-authRoutes.post(`/add-user`, addUserControllers);
+authRoutes.post(`/send-otp`, sendOtpController);
+authRoutes.patch(`/verify-otp`, verifyOtpController);
 authRoutes.get(`/check-user`, checkUserController);
 authRoutes.get(`/logout-user`, logoutUserController);
 

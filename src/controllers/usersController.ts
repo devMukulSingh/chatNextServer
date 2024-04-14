@@ -7,13 +7,17 @@ export async function getUsersController(
   next: NextFunction,
 ) {
   try {
-    const users = await prisma.user.findMany({});
-
+    const users = await prisma.user.findMany({
+      where:{
+        isVerified:true
+      }
+    });
+    
     res.status(200).json(users);
 
     return;
   } catch (e) {
-    res.status(500).json(`Error in getUsersController ${e}`);
+    res.status(500).json(e);
     console.log(`Error in getUsersController ${e}`);
     return;
   }

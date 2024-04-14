@@ -24,6 +24,8 @@ model User {
   password         String
   email            String    @unique
   image            String?
+  isVerified       Boolean   @default(false)
+  otp              String        
   sentMessages     Message[] @relation("userToSentMessages")
   receivedMessages Message[] @relation("userToReceivedMessages")
   createdAt        DateTime  @default(now())
@@ -39,10 +41,6 @@ model Message {
   receiverId          String          @db.ObjectId
   type                String        @default("text")
   message             String
-  filePath           String?
-  fileName           String?  
-  // file               File             @relation(fields: [id],references: [fileId])
-  // fileId              String           @db.ObjectId
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
 

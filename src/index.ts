@@ -41,15 +41,15 @@ io.on("connection", (socket) => {
       onlineUsers.set(userId, socket.id);
     }
   });
-
+  
   socket.on("send-msg", (message) => {
-    if (!message) console.log("message is required");
 
     const receiverSocket = onlineUsers.get(message.receiverId);
 
     if (!receiverSocket) console.log("receiverSocket is required");
 
     if (message) {
+      console.log("at send message ", onlineUsers, receiverSocket);
       socket.to(receiverSocket).emit("receive-msg", message);
     }
   });
