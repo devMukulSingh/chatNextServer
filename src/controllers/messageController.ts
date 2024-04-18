@@ -198,13 +198,13 @@ export async function uploadFileController(
       contentType: type,
     });
 
-    const response = await axios.put(url, file.buffer, {
-      headers: {
-        "Content-Type": type,
-      },
+    await axios.put(url, file.buffer ,{
+      headers:{
+        "Content-Type":type
+      }
     });
 
-    const message = await prisma.message.create({
+    await prisma.message.create({
       data: {
         senderUser: {
           connect: { id: senderId },

@@ -1,54 +1,56 @@
 import { NextFunction, Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import nodemailer from "nodemailer";
 import { jwtSign } from "../lib/jwt";
 import { User } from "@prisma/client";
+import { getProfileImageUrlFromAws } from "../lib/getProfileImageUrlFromAws";
+import { sendOtp } from "../lib/sendOtp";
 
 export async function sendOtpController(req: Request, res: Response) {
   try {
-    const { email, password, name } = req.body;
+    const email = req.query.email?.toString();
+    const password = req.query.password?.toString();
+    const name = req.query.name?.toString();
+    let imageUrl = "";
+
+    if(!email){
+      return res.status(400).json({
+        error:"email is required"
+      })
+    }
+    if (!password) {
+      return res.status(400).json({
+        error: "password is required"
+      })
+    }
+    if (!name) {
+      return res.status(400).json({
+        error: "name is required"
+      })
+    }
 
     const user: User | null = await prisma.user.findUnique({
       where: {
         email,
       },
     });
-
     if (user?.isVerified === true)
       return res.status(400).json({
         error: "User already exists",
       });
 
+
     //sending OTP
-    const transporter = nodemailer.createTransport({
-      host: "smtp-relay.brevo.com",
-      port: 587,
-      auth: {
-        user: "mukulsingh2276@gmail.com",
-        pass: process.env.SMTP_PASS,
-      },
-    });
-
-    let otp = 0;
-    const sendOtp = async () => {
-      otp = Math.ceil(Math.random() * 10000);
-      const mailOtptions = {
-        from: "mukulsingh2276@gmail.com",
-        to: email,
-        subject: "Verfify your email",
-        html: `<h1>Enter the otp ${otp} to verify your email</h1>`,
-      };
-      await transporter.sendMail(mailOtptions);
-    };
-
-    await sendOtp();
-
+    const otp = await sendOtp(email);
     const hashedPassword = await bcrypt.hash(password, 8);
-    // const hashedOtp = await bcrypt.hash(otp.toLocaleString(), 8);
-
     let newUser;
+
+    //getting image Url from AWS
+    if(req.file){
+      // console.log(req.file);
+     imageUrl = await getProfileImageUrlFromAws(req.file);
+    //  console.log(imageUrl);
+    }
     if (user && user?.isVerified === false) {
       newUser = await prisma.user.update({
         where: {
@@ -56,17 +58,18 @@ export async function sendOtpController(req: Request, res: Response) {
         },
         data: {
           otp: otp.toString(),
-          // otp: hashedOtp,
+          name,
+          password,
+          profileImage:imageUrl
         },
       });
-
       return res.status(201).json("Otp sent");
     }
     newUser = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
-        // otp: hashedOtp,
+        profileImage: imageUrl,
         otp: otp.toString(),
         name,
       },
@@ -179,15 +182,14 @@ export async function checkUserController(
     }
 
     const token = await jwtSign();
+    
+    return res.cookie("token", token,{
+      httpOnly:true,
+      sameSite:"lax",
+      secure:false,
 
-    res.cookie("token", token, {
-      httpOnly: true,
-    });
+    }).status(200).json({...user,token})
 
-    res
-      .status(200)
-      .cookie("token", token)
-      .json({ ...user, token });
   } catch (e) {
     next(e);
   }

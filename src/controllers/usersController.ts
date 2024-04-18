@@ -6,13 +6,15 @@ export async function getUsersController(
   res: Response,
   next: NextFunction,
 ) {
+  
   try {
     const users = await prisma.user.findMany({
       where: {
         isVerified: true,
       },
     });
-
+    // res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+    // res.header('Access-Control-Allow-Credentials', "true");
     res.status(200).json(users);
 
     return;

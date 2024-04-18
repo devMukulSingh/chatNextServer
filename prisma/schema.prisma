@@ -23,7 +23,7 @@ model User {
   name             String
   password         String
   email            String    @unique
-  image            String?
+  profileImage     String?
   isVerified       Boolean   @default(false)
   otp              String        
   sentMessages     Message[] @relation("userToSentMessages")
