@@ -5,28 +5,30 @@ import { jwtSign } from "../lib/jwt";
 import { User } from "@prisma/client";
 import { getProfileImageUrlFromAws } from "../lib/getProfileImageUrlFromAws";
 import { sendOtp } from "../lib/sendOtp";
+import { getObjectURL } from "../aws";
 
 export async function sendOtpController(req: Request, res: Response) {
   try {
+    const file = req.file;
     const email = req.query.email?.toString();
     const password = req.query.password?.toString();
     const name = req.query.name?.toString();
-    let imageUrl = "";
+    let key = "";
 
-    if(!email){
+    if (!email) {
       return res.status(400).json({
-        error:"email is required"
-      })
+        error: "email is required",
+      });
     }
     if (!password) {
       return res.status(400).json({
-        error: "password is required"
-      })
+        error: "password is required",
+      });
     }
     if (!name) {
       return res.status(400).json({
-        error: "name is required"
-      })
+        error: "name is required",
+      });
     }
 
     const user: User | null = await prisma.user.findUnique({
@@ -39,17 +41,22 @@ export async function sendOtpController(req: Request, res: Response) {
         error: "User already exists",
       });
 
-
     //sending OTP
     const otp = await sendOtp(email);
     const hashedPassword = await bcrypt.hash(password, 8);
     let newUser;
 
     //getting image Url from AWS
-    if(req.file){
-      // console.log(req.file);
-     imageUrl = await getProfileImageUrlFromAws(req.file);
-    //  console.log(imageUrl);
+    if (req.file) {
+      const contentType = file?.mimetype || "";
+      const fileName = file?.filename || "";
+      key = `uploads/profileImages/${Date.now()}-${fileName}`;
+      await getProfileImageUrlFromAws({
+        contentType,
+        fileName,
+        key,
+        Body:file?.buffer
+      });
     }
     if (user && user?.isVerified === false) {
       newUser = await prisma.user.update({
@@ -60,7 +67,7 @@ export async function sendOtpController(req: Request, res: Response) {
           otp: otp.toString(),
           name,
           password,
-          profileImage:imageUrl
+          profileImage: key,
         },
       });
       return res.status(201).json("Otp sent");
@@ -69,7 +76,7 @@ export async function sendOtpController(req: Request, res: Response) {
       data: {
         email,
         password: hashedPassword,
-        profileImage: imageUrl,
+        profileImage: key,
         otp: otp.toString(),
         name,
       },
@@ -108,7 +115,7 @@ export async function verifyOtpController(req: Request, res: Response) {
         error: "User doesn't exists",
       });
     }
-    if (user.otp !== otp) {
+    if (user.otp != otp) {
       return res.status(400).json({
         error: "Invalid OTP",
       });
@@ -157,7 +164,7 @@ export async function checkUserController(
       return;
     }
     if (!password) {
-      res.status(400).json({ error: "password is required" });
+      res.status(400).json({ error: "Password is required" });
       return;
     }
 
@@ -182,14 +189,22 @@ export async function checkUserController(
     }
 
     const token = await jwtSign();
-    
-    return res.cookie("token", token,{
-      httpOnly:true,
-      sameSite:"lax",
-      secure:false,
 
-    }).status(200).json({...user,token})
+    let imageUrl="";
+    if(user.profileImage && user.profileImage!=="")
+    {
+      imageUrl = await getObjectURL(user.profileImage);
+      user.profileImage = imageUrl;
+    }
 
+    return res
+      .cookie("token", token, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+      })
+      .status(200)
+      .json({ ...user, token });
   } catch (e) {
     next(e);
   }

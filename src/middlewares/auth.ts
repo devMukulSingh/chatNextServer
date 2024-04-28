@@ -7,7 +7,7 @@ export default async function isAuthenticated(
   next: NextFunction,
 ) {
   try {
-    const token = req.cookies
+    const token = req.cookies;
     let isAuthenticated;
     // console.log(token,"token");
 
@@ -15,7 +15,7 @@ export default async function isAuthenticated(
     //   const Response = res.status(403).json({ error: "Uncauthenticated" })
     //   res.redirect("/");
     //   return Response;
-    // } 
+    // }
     // isAuthenticated = await isAuth(token);
     // console.log(isAuthenticated, "isAuthenticated");
 

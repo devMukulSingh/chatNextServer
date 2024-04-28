@@ -16,8 +16,7 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     origin: BASE_URL_CLIENT,
-    credentials:true,
-    
+    credentials: true,
   },
 });
 

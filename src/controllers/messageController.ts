@@ -1,10 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { prisma } from "../lib/prisma";
-import { renameSync } from "fs";
-import { BASE_URL_SERVER } from "../lib/BASE_URL";
 import { deleteObject, getObjectURL, putObject } from "../aws";
 const path = require("path");
-import axios from "axios";
 
 export async function postMessageController(
   req: Request,
@@ -92,8 +89,8 @@ export async function getMessagesController(
       }
     }
 
-    res.status(200).json(messages);
-    return;
+    return res.status(200).json(messages);
+
   } catch (e) {
     res.status(500).json(`Error in postMessageController ${e}`);
     console.log(`Error in postMessageController ${e}`);
@@ -193,15 +190,10 @@ export async function uploadFileController(
     const filename = file?.filename || "";
     const key = `uploads/file-message/${Date.now()}-${filename}`;
 
-    const url = await putObject({
+    await putObject({
       key,
       contentType: type,
-    });
-
-    await axios.put(url, file.buffer ,{
-      headers:{
-        "Content-Type":type
-      }
+      Body:file.buffer
     });
 
     await prisma.message.create({
@@ -227,69 +219,3 @@ export async function uploadFileController(
   }
 }
 
-// export async function getFileController(
-//   req: Request,
-//   res: Response,
-//   next: NextFunction,
-// ) {
-//   try {
-//     const fileId = req.params.fileId.toString();
-
-//     if (!fileId) {
-//       res.status(400).json({ error: "File id is required" });
-//       return;
-//     }
-
-//     const fileByFileId = await prisma.message.findUnique({
-//       where: {
-//         id: fileId,
-//       },
-//     });
-
-//     if (!fileByFileId?.fileName) {
-//       res.status(404).json({ error: "No such file found" });
-//       return;
-//     }
-
-//     res.status(200).sendFile(fileByFileId?.fileName, { root: "uploads" });
-//     return;
-//   } catch (e) {
-//     next(e);
-//   }
-// }
-
-// export async function downloadFileController(
-//   req: Request,
-//   res: Response,
-//   next: NextFunction,
-// ) {
-//   try {
-//     const fileId = req.params.fileId.toString();
-//     console.log(fileId);
-
-//     if (!fileId) {
-//       res.status(400).json({ error: "File id is required" });
-//     }
-
-//     const file = await prisma.message.findUnique({
-//       where: {
-//         id: fileId,
-//       },
-//     });
-//     console.log(file);
-
-//     if (!file) {
-//       res.status(404).json({ error: "No such file found" });
-//       return;
-//     }
-//     const fileName = file.fileName || "";
-
-//     const filePath = path.join(__dirname, `../../uploads/${fileName}`);
-
-//     res.download(filePath, fileName, (e) => {
-//       console.log(e);
-//     });
-//   } catch (e) {
-//     next(e);
-//   }
-// }

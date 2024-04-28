@@ -1,20 +1,21 @@
 import axios from "axios";
 import { getObjectURL, putObject } from "../aws";
+import multer from "multer";
 
-
-export  const getProfileImageUrlFromAws = async(profileImage:any) => {
-    const contentType = profileImage.mimetype || "";
-    const filename = profileImage?.filename || "";
-    const key = `uploads/profileImages/${Date.now()}-${filename}`;
-    const url = await putObject({
-        key,
-        contentType,
-    });
-    await axios.put(url, profileImage.buffer,{
-        headers: {
-            "Content-Type": contentType
-        }
-    });
-    const imageUrl = await getObjectURL(key);
-    return imageUrl;
+interface IgetProfileImageUrlFromAwsArgs{
+  contentType:string,
+  fileName:string,
+  key:string,
+  Body: Buffer | undefined
 }
+
+export const getProfileImageUrlFromAws = async ({ contentType, fileName, key, Body }: IgetProfileImageUrlFromAwsArgs)  => {
+
+  const url = await putObject({
+    key,
+    contentType,
+    Body
+  }); 
+
+  return key;
+};
