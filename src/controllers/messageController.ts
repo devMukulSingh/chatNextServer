@@ -90,7 +90,6 @@ export async function getMessagesController(
     }
 
     return res.status(200).json(messages);
-
   } catch (e) {
     res.status(500).json(`Error in postMessageController ${e}`);
     console.log(`Error in postMessageController ${e}`);
@@ -193,7 +192,7 @@ export async function uploadFileController(
     await putObject({
       key,
       contentType: type,
-      Body:file.buffer
+      Body: file.buffer,
     });
 
     await prisma.message.create({
@@ -218,4 +217,3 @@ export async function uploadFileController(
       .json({ error: `Error in uploadFileController ${e}` });
   }
 }
-

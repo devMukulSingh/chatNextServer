@@ -55,7 +55,7 @@ export async function sendOtpController(req: Request, res: Response) {
         contentType,
         fileName,
         key,
-        Body:file?.buffer
+        Body: file?.buffer,
       });
     }
     if (user && user?.isVerified === false) {
@@ -190,9 +190,8 @@ export async function checkUserController(
 
     const token = await jwtSign();
 
-    let imageUrl="";
-    if(user.profileImage && user.profileImage!=="")
-    {
+    let imageUrl = "";
+    if (user.profileImage && user.profileImage !== "") {
       imageUrl = await getObjectURL(user.profileImage);
       user.profileImage = imageUrl;
     }
@@ -200,7 +199,7 @@ export async function checkUserController(
     return res
       .cookie("token", token, {
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "none",
         secure: false,
       })
       .status(200)

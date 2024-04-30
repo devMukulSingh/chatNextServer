@@ -13,13 +13,13 @@ export async function getUsersController(
         isVerified: true,
       },
     });
-    for(let user of users){
-      if(user.profileImage && user.profileImage !== ""){
+    for (let user of users) {
+      if (user.profileImage && user.profileImage !== "") {
         const imageUrl = await getObjectURL(user.profileImage);
         user.profileImage = imageUrl;
       }
     }
-    
+
     return res.status(200).json(users);
   } catch (e) {
     res.status(500).json(e);

@@ -8,12 +8,15 @@ import {
   uploadFileController,
 } from "../controllers/messageController";
 import multer from "multer";
+import isAuthenticated from "../middlewares/auth";
 
 const storage = multer.memoryStorage();
 
 export const upload = multer({ storage });
 
 const messageRoutes = Router();
+
+messageRoutes.use(isAuthenticated)
 
 messageRoutes.post("/post-message", postMessageController);
 messageRoutes.get("/get-messages", getMessagesController);

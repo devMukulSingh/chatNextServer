@@ -7,23 +7,21 @@ export default async function isAuthenticated(
   next: NextFunction,
 ) {
   try {
-    const token = req.cookies;
+    const token = req.headers.authorization
     let isAuthenticated;
-    // console.log(token,"token");
 
-    // if (!token || token==="") {
-    //   const Response = res.status(403).json({ error: "Uncauthenticated" })
-    //   res.redirect("/");
-    //   return Response;
-    // }
-    // isAuthenticated = await isAuth(token);
-    // console.log(isAuthenticated, "isAuthenticated");
+    if (!token || token==="") {
+      const Response = res.status(403).json({ error: "Unauthenticated" })
+      res.redirect("/");
+      return Response;
+    }
+    isAuthenticated = await isAuth(token);
 
-    // if (!isAuthenticated) {
-    //   const Response = res.status(403).json({error:"Uncauthenticated"})
-    //   res.redirect("/");
-    //   return Response;
-    // }
+    if (!isAuthenticated) {
+      const Response = res.status(403).json({error:"Uncauthenticated"})
+      res.redirect("/");
+      return Response;
+    }
 
     next();
   } catch (e) {
