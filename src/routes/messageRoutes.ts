@@ -16,7 +16,7 @@ export const upload = multer({ storage });
 
 const messageRoutes = Router();
 
-messageRoutes.use(isAuthenticated)
+messageRoutes.use(isAuthenticated);
 
 messageRoutes.post("/post-message", postMessageController);
 messageRoutes.get("/get-messages", getMessagesController);

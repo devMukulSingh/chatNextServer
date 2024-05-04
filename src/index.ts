@@ -8,6 +8,7 @@ import messageRoutes from "./routes/messageRoutes";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { BASE_URL_CLIENT } from "./lib/BASE_URL";
+import { startServerController } from "./controllers/startServerController";
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use(cookieParser());
 app.use(cors());
 app.use(express.json());
 
+app.get('/api/start-server',startServerController);
 app.use(`/api/auth`, authRoutes);
 app.use(`/api/user`, userRoutes);
 app.use(`/api/message`, messageRoutes);

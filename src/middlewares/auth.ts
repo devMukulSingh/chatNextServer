@@ -7,18 +7,18 @@ export default async function isAuthenticated(
   next: NextFunction,
 ) {
   try {
-    const token = req.headers.authorization
+    const token = req.headers.authorization;
     let isAuthenticated;
 
-    if (!token || token==="") {
-      const Response = res.status(403).json({ error: "Unauthenticated" })
+    if (!token || token === "") {
+      const Response = res.status(403).json({ error: "Unauthenticated" });
       res.redirect("/");
       return Response;
     }
     isAuthenticated = await isAuth(token);
 
     if (!isAuthenticated) {
-      const Response = res.status(403).json({error:"Uncauthenticated"})
+      const Response = res.status(403).json({ error: "Uncauthenticated" });
       res.redirect("/");
       return Response;
     }
